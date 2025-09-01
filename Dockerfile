@@ -1,18 +1,14 @@
-# Menggunakan image Go yang lengkap
-FROM golang:1.24-alpine
+FROM golang:1.24-alpine AS builder
 
-# Atur direktori kerja
 WORKDIR /app
 
-# Salin semua file sumber
-COPY . .
-
-# Unduh dan bangun aplikasi
+COPY go.mod go.sum ./
 RUN go mod download
-RUN go build -o main .
+COPY . .
+RUN CGO_ENABLED=0 go build -o main .
 
-# Atur variabel lingkungan untuk port
-ENV PORT=8080
+FROM alpine:3.18
+WORKDIR /
+COPY --from=builder /app/main .
 
-# Jalankan aplikasi
 CMD ["./main"]
