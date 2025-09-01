@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"masjid-api/models"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -45,5 +47,22 @@ func ConnectDB() error {
 	}
 
 	fmt.Println("Database connection successfully opened.")
+
+	// Melakukan migrasi setelah koneksi berhasil
+	err = DB.AutoMigrate(
+		&models.Role{},
+		&models.User{},
+		&models.Ustadz{},
+		&models.KategoriKajian{},
+		&models.Kajian{},
+		&models.Donation{},
+		&models.Expense{},
+		&models.Finance{},
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to auto migrate tables: %w", err)
+	}
+	log.Println("Database migration completed.")
 	return nil
 }
