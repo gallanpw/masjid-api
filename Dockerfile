@@ -21,12 +21,6 @@ RUN CGO_ENABLED=0 go build -o main .
 # ---
 
 # Tahap 2: Tahap Akhir (Runtime)
-# Gunakan image Alpine yang sangat kecil
-FROM alpine:3.18
-
-# Atur direktori kerja
-WORKDIR /
-
 # Salin file biner dari tahap builder ke tahap akhir
 COPY --from=builder /app/main .
 
