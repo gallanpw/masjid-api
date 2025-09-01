@@ -14,9 +14,11 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() error {
+	log.Println("Loading .env file...")
 	// Mencoba memuat .env file (hanya untuk pengembangan lokal)
 	// err := godotenv.Load()
 	_ = godotenv.Load()
+	log.Println("Environment variables loaded (or skipped).")
 
 	// if err != nil {
 	// 	// log.Fatalf("Error loading .env file")
@@ -38,6 +40,7 @@ func ConnectDB() error {
 		)
 	}
 
+	log.Println("Attempting to open database connection...")
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -47,6 +50,7 @@ func ConnectDB() error {
 	}
 
 	fmt.Println("Database connection successfully opened.")
+	log.Println("Database connection successful. Running migrations...")
 
 	// Melakukan migrasi setelah koneksi berhasil
 	err = DB.AutoMigrate(
