@@ -14,7 +14,7 @@ RUN go build -o main .
 # Final stage
 FROM alpine:3.18
 
-WORKDIR /
+WORKDIR /app
 
 ENV PORT=8080
 
