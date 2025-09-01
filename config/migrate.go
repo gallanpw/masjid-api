@@ -20,7 +20,8 @@ func AutoMigrateTables() {
 
 	if err != nil {
 		// log.Fatalf("Gagal melakukan migrasi database: %v", err)
-		panic(err)
+		// panic(err)
+		log.Println("Gagal melakukan migrasi database:", err)
 	}
 
 	log.Println("Migrasi database berhasil.")
