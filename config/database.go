@@ -5,16 +5,18 @@ import (
 	"log"
 	"masjid-api/models"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+// DB adalah variabel koneksi database global.
 var DB *gorm.DB
 
-func ConnectDB() error {
-	log.Println("Loading .env file...")
+func ConnectDB() {
+	// log.Println("Loading .env file...")
 	// Mencoba memuat .env file (hanya untuk pengembangan lokal)
 	// err := godotenv.Load()
 	_ = godotenv.Load()
@@ -40,33 +42,36 @@ func ConnectDB() error {
 		)
 	}
 
-	log.Println("Attempting to open database connection...")
-	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		// panic(err)
-		// log.Fatalf("Failed to connect to database: %v", err)
-		return fmt.Errorf("failed to connect to database: %w", err)
+	// Menggunakan perulangan retry untuk menghubungkan ke database
+	maxRetries := 5
+	for i := 1; i <= maxRetries; i++ {
+		log.Printf("Mencoba menghubungkan ke database... (Percobaan %d dari %d)", i, maxRetries)
+		var err error
+		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			log.Printf("Gagal terhubung: %v. Mencoba lagi dalam 5 detik...", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		log.Println("Koneksi database berhasil. Menjalankan migrasi...")
+		err = DB.AutoMigrate(
+			&models.Role{},
+			&models.User{},
+			&models.Ustadz{},
+			&models.KategoriKajian{},
+			&models.Kajian{},
+			&models.Donation{},
+			&models.Expense{},
+			&models.Finance{},
+		)
+		if err != nil {
+			log.Fatalf("Gagal melakukan migrasi tabel: %v", err)
+		}
+
+		log.Println("Migrasi database selesai dengan sukses.")
+		return // Keluar dari fungsi jika berhasil
 	}
 
-	fmt.Println("Database connection successfully opened.")
-	log.Println("Database connection successful. Running migrations...")
-
-	// Melakukan migrasi setelah koneksi berhasil
-	err = DB.AutoMigrate(
-		&models.Role{},
-		&models.User{},
-		&models.Ustadz{},
-		&models.KategoriKajian{},
-		&models.Kajian{},
-		&models.Donation{},
-		&models.Expense{},
-		&models.Finance{},
-	)
-
-	if err != nil {
-		return fmt.Errorf("failed to auto migrate tables: %w", err)
-	}
-	log.Println("Database migration completed.")
-	return nil
+	log.Fatal("Gagal menghubungkan ke database setelah beberapa kali mencoba. Keluar.")
 }
