@@ -1,2 +1,2 @@
-build: go build -o main
+// build: go build -o main
 web: ./main
