@@ -16,7 +16,7 @@ func main() {
 	config.ConnectDB()
 
 	// migrasi database secara otomatis
-	config.AutoMigrateTables()
+	// config.AutoMigrateTables()
 
 	// --- PANGGIL FUNGSI BACKFILL DI SINI ---
 	// Hapus baris ini setelah pertama kali dijalankan
