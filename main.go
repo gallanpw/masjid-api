@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	// "log"
 	"masjid-api/config"
+
 	// "masjid-api/repository"
 	"masjid-api/routes"
 	"os"
@@ -16,7 +17,7 @@ func main() {
 	config.ConnectDB()
 
 	// migrasi database secara otomatis
-	// config.AutoMigrateTables()
+	config.AutoMigrateTables()
 
 	// --- PANGGIL FUNGSI BACKFILL DI SINI ---
 	// Hapus baris ini setelah pertama kali dijalankan
