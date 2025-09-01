@@ -10,5 +10,7 @@ RUN go mod download
 COPY . .
 # Bangun (compile) aplikasi ke file biner bernama 'main'
 RUN go build -o main .
+# Mengekspos port 8080 agar dapat diakses oleh Railway
+EXPOSE 8080
 # Jalankan aplikasi
 CMD ["./main"]
