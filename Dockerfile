@@ -1,5 +1,5 @@
 # Tahap 1: Builder
-# Gunakan image Go yang lengkap untuk mengompilasi aplikasi
+# Menggunakan image Go yang lengkap untuk mengompilasi aplikasi
 FROM golang:1.24-alpine AS builder
 
 # Atur direktori kerja
@@ -15,12 +15,17 @@ RUN go mod download
 COPY . .
 
 # Bangun aplikasi ke file biner bernama 'main'
-# CGO_ENABLED=0 untuk membuat biner yang berdiri sendiri
 RUN CGO_ENABLED=0 go build -o main .
 
 # ---
 
 # Tahap 2: Tahap Akhir (Runtime)
+# Gunakan image Alpine yang sangat kecil. TIDAK ADA AS runtime
+FROM alpine:3.18
+
+# Atur direktori kerja
+WORKDIR /
+
 # Salin file biner dari tahap builder ke tahap akhir
 COPY --from=builder /app/main .
 
