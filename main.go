@@ -1,9 +1,9 @@
 package main
 
 import (
-	// "fmt"
-	// "log"
+	"log"
 	"masjid-api/config"
+	"time"
 
 	// "masjid-api/repository"
 	"masjid-api/routes"
@@ -14,10 +14,10 @@ import (
 
 func main() {
 	// Koneksi ke database
-	config.ConnectDB()
+	// config.ConnectDB()
 
 	// migrasi database secara otomatis
-	config.AutoMigrateTables()
+	// config.AutoMigrateTables()
 
 	// --- PANGGIL FUNGSI BACKFILL DI SINI ---
 	// Hapus baris ini setelah pertama kali dijalankan
@@ -26,6 +26,25 @@ func main() {
 	// }
 	// fmt.Println("Finance table backfilled successfully.")
 	// --- AKHIR PANGGILAN FUNGSI BACKFILL ---
+
+	// Retry logic untuk koneksi database
+	maxAttempts := 5
+	for i := 1; i <= maxAttempts; i++ {
+		log.Printf("Attempting to connect to database... (Attempt %d of %d)", i, maxAttempts)
+
+		// Panggilan fungsi sekarang cocok dengan tanda tangan yang mengembalikan 'error'
+		if err := config.ConnectDB(); err != nil {
+			log.Printf("Failed to connect: %v. Retrying in 5 seconds...", err)
+			time.Sleep(5 * time.Second)
+		} else {
+			log.Println("Database connection successful.")
+			break
+		}
+
+		if i == maxAttempts {
+			log.Fatal("Failed to connect to database after multiple retries. Exiting.")
+		}
+	}
 
 	// Inisialisasi router Gin
 	r := gin.Default()
@@ -39,5 +58,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	log.Printf("Server starting on port %s", port)
 	r.Run(":" + port)
 }
