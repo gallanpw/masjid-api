@@ -1,23 +1,33 @@
-# Tahap 1: Builder
+# Tahap build: Menggunakan image Go resmi untuk mengompilasi aplikasi
 FROM golang:1.24-alpine AS builder
 
+# Atur direktori kerja
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# Salin go.mod dan go.sum untuk mengunduh dependensi
+COPY go.mod ./
+COPY go.sum ./
+
+# Unduh semua dependensi
 RUN go mod download
+
+# Salin semua file sumber
 COPY . .
-RUN CGO_ENABLED=0 go build -o main .
 
-# ---
+# Bangun (compile) aplikasi ke file biner bernama 'main'
+RUN go build -o main .
 
-# Tahap 2: Tahap Akhir (Runtime)
+# Tahap final: Menggunakan image yang sangat kecil untuk menjalankan aplikasi
 FROM alpine:3.18
 
-# Buat direktori aplikasi dan atur sebagai direktori kerja
-WORKDIR /app
+# Mengatur variabel lingkungan untuk port
+ENV PORT=8080
 
-# Salin file biner dari tahap builder ke direktori /app
-COPY --from=builder /app/main /app/main
+# Salin file biner dari tahap builder
+COPY --from=builder /app/main .
 
-# Jalankan aplikasi. Ini secara eksplisit menjalankan biner dari /app
+# Atur direktori kerja
+WORKDIR /
+
+# Jalankan aplikasi
 CMD ["./main"]
